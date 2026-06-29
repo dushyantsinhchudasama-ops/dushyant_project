@@ -14,7 +14,6 @@ import com.fooddelivery.state.OrderStateFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class OrderService {
@@ -47,7 +46,7 @@ public class OrderService {
                 .collect(Collectors.toList());
 
         Order order = new Order(
-                UUID.randomUUID().toString(),
+                generateNextOrderId(),
                 customerId,
                 null,
                 orderItems,
@@ -92,12 +91,20 @@ public class OrderService {
         if (order.getStatus() != OrderStatus.OUT_FOR_DELIVERY) {
             throw new IllegalStateException("Order must be ready for delivery before assignment. Current status: " + order.getStatus());
         }
-        DeliveryPerson deliveryPerson = deliveryService.getDeliveryPersonById(deliveryPersonId);
-        if (!deliveryPerson.isAvailable()) {
-            throw new IllegalStateException("Delivery person is not available: " + deliveryPersonId);
+
+        DeliveryPerson deliveryPerson;
+        if (deliveryPersonId == null || deliveryPersonId.isBlank()) {
+            deliveryPerson = deliveryService.findAvailableDeliveryPerson();
+        } else {
+            deliveryPerson = deliveryService.getDeliveryPersonById(deliveryPersonId);
+            if (!deliveryPerson.isAvailable()) {
+                throw new IllegalStateException("Delivery person is not available: " + deliveryPersonId);
+            }
         }
-        order.setDeliveryPersonId(deliveryPersonId);
-        deliveryService.updateDeliveryPerson(deliveryPersonId, deliveryPerson.getName(), deliveryPerson.getEmail(), deliveryPerson.getPhoneNumber(), deliveryPerson.getVehicleNumber(), false);
+
+        String assignedDeliveryPersonId = deliveryPerson.getId();
+        order.setDeliveryPersonId(assignedDeliveryPersonId);
+        deliveryService.updateDeliveryPerson(assignedDeliveryPersonId, deliveryPerson.getName(), deliveryPerson.getEmail(), deliveryPerson.getPhoneNumber(), deliveryPerson.getVehicleNumber(), false);
         orderRepository.update(order);
         orderStatusNotifier.notifyObservers(order);
         return order;
@@ -174,5 +181,25 @@ public class OrderService {
 
     public void unregisterObserver(com.fooddelivery.observer.OrderObserver observer) {
         orderStatusNotifier.unregisterObserver(observer);
+    }
+
+    private String generateNextOrderId() {
+        int maxId = orderRepository.findAll().stream()
+                .map(Order::getId)
+                .mapToInt(this::parseNumericId)
+                .max()
+                .orElse(0);
+        return String.valueOf(maxId + 1);
+    }
+
+    private int parseNumericId(String id) {
+        if (id == null || id.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

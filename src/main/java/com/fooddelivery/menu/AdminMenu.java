@@ -146,7 +146,9 @@ public class AdminMenu {
             return;
         }
         System.out.println("Categories:");
-        categories.forEach(category -> System.out.println(category.getId() + " - " + category.getName()));
+        System.out.printf("%-8s %-20s%n", "ID", "Name");
+        System.out.println("----------------------------");
+        categories.forEach(category -> System.out.printf("%-8d %-20s%n", category.getId(), category.getName()));
     }
 
     private void manageMenuItems() {
@@ -287,8 +289,17 @@ public class AdminMenu {
             return;
         }
         System.out.println("Menu items:");
-        items.forEach(item -> System.out.printf("%s - %s - %.2f - available=%s - category=%s%n",
-                item.getId(), item.getName(), item.getPrice(), item.isAvailable(), item.getCategoryId()));
+        System.out.printf("%-8s %-20s %-12s %-12s %-20s%n", "ID", "Name", "Price", "Available", "Category");
+        System.out.println("-------------------------------------------------------------------");
+        items.forEach(item -> {
+            String categoryName = categoryService.getAllCategories().stream()
+                    .filter(category -> category.getId() == item.getCategoryId())
+                    .map(Category::getName)
+                    .findFirst()
+                    .orElse("Unknown");
+            System.out.printf("%-8d %-20s %-12.2f %-12s %-20s%n",
+                    item.getId(), item.getName(), item.getPrice(), item.isAvailable(), categoryName);
+        });
     }
 
     private void manageDeliveryPersons() {
@@ -373,7 +384,9 @@ public class AdminMenu {
             return;
         }
         System.out.println("Delivery persons:");
-        deliveryPeople.forEach(person -> System.out.printf("%s - %s - %s - vehicle=%s - available=%s%n",
+        System.out.printf("%-12s %-20s %-25s %-15s %-10s%n", "ID", "Name", "Email", "Vehicle", "Available");
+        System.out.println("-------------------------------------------------------------------");
+        deliveryPeople.forEach(person -> System.out.printf("%-12s %-20s %-25s %-15s %-10s%n",
                 person.getId(), person.getName(), person.getEmail(), person.getVehicleNumber(), person.isAvailable()));
     }
 
@@ -451,7 +464,9 @@ public class AdminMenu {
             return;
         }
         System.out.println("Pending orders:");
-        orders.forEach(order -> System.out.printf("%s - customer=%s - status=%s - total=%.2f%n",
+        System.out.printf("%-15s %-15s %-15s %-10s%n", "Order ID", "Customer", "Status", "Total");
+        System.out.println("------------------------------------------------------");
+        orders.forEach(order -> System.out.printf("%-15s %-15s %-15s %-10.2f%n",
                 order.getId(), order.getCustomerId(), order.getStatus(), order.getFinalAmount()));
     }
 
@@ -462,7 +477,9 @@ public class AdminMenu {
             return;
         }
         System.out.println("Order history:");
-        orders.forEach(order -> System.out.printf("%s - customer=%s - status=%s - total=%.2f%n",
+        System.out.printf("%-15s %-15s %-15s %-10s%n", "Order ID", "Customer", "Status", "Total");
+        System.out.println("------------------------------------------------------");
+        orders.forEach(order -> System.out.printf("%-15s %-15s %-15s %-10.2f%n",
                 order.getId(), order.getCustomerId(), order.getStatus(), order.getFinalAmount()));
     }
 
@@ -473,7 +490,9 @@ public class AdminMenu {
             return;
         }
         System.out.println("Orders:");
-        orders.forEach(order -> System.out.printf("%s - customer=%s - delivery=%s - status=%s - total=%.2f%n",
+        System.out.printf("%-15s %-15s %-15s %-15s %-10s%n", "Order ID", "Customer", "Delivery", "Status", "Total");
+        System.out.println("-------------------------------------------------------------------");
+        orders.forEach(order -> System.out.printf("%-15s %-15s %-15s %-15s %-10.2f%n",
                 order.getId(), order.getCustomerId(), order.getDeliveryPersonId(), order.getStatus(), order.getFinalAmount()));
     }
 
@@ -495,7 +514,7 @@ public class AdminMenu {
         System.out.print("Enter order id: ");
         String orderId = scanner.nextLine().trim();
         viewDeliveryPersons();
-        System.out.print("Enter delivery person id: ");
+        System.out.print("Enter delivery person id (leave blank to auto-assign to a free person): ");
         String deliveryId = scanner.nextLine().trim();
         try {
             Order updated = orderService.assignDeliveryPerson(orderId, deliveryId);

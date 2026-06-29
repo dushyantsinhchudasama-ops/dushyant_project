@@ -8,7 +8,6 @@ import com.fooddelivery.model.DeliveryPerson;
 import com.fooddelivery.repository.UserRepository;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class DeliveryService {
@@ -22,7 +21,7 @@ public class DeliveryService {
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException("Email already registered: " + email);
         }
-        String id = UUID.randomUUID().toString();
+        String id = generateNextUserId();
         DeliveryPerson deliveryPerson = UserFactory.createDeliveryPerson(id, name, email, password, phoneNumber, vehicleNumber);
         userRepository.save(deliveryPerson);
         return deliveryPerson;
@@ -77,5 +76,25 @@ public class DeliveryService {
                 .filter(DeliveryPerson::isAvailable)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No available delivery person found."));
+    }
+
+    private String generateNextUserId() {
+        int maxId = userRepository.findAll().stream()
+                .map(AbstractUser::getId)
+                .mapToInt(this::parseNumericId)
+                .max()
+                .orElse(0);
+        return String.valueOf(maxId + 1);
+    }
+
+    private int parseNumericId(String id) {
+        if (id == null || id.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

@@ -12,6 +12,7 @@ import com.fooddelivery.service.AuthenticationService;
 import com.fooddelivery.service.CartService;
 import com.fooddelivery.service.CategoryService;
 import com.fooddelivery.service.CustomerService;
+import com.fooddelivery.service.DeliveryService;
 import com.fooddelivery.service.MenuService;
 import com.fooddelivery.service.OrderService;
 import com.fooddelivery.service.PaymentService;
@@ -29,6 +30,7 @@ public class CustomerMenu {
     private final CartService cartService;
     private final OrderService orderService;
     private final PaymentService paymentService;
+    private final DeliveryService deliveryService;
     private final AuthenticationService authenticationService;
     private final CustomerService customerService;
     private final Scanner scanner;
@@ -39,6 +41,7 @@ public class CustomerMenu {
                         CartService cartService,
                         OrderService orderService,
                         PaymentService paymentService,
+                        DeliveryService deliveryService,
                         AuthenticationService authenticationService,
                         CustomerService customerService,
                         Scanner scanner) {
@@ -48,6 +51,7 @@ public class CustomerMenu {
         this.cartService = cartService;
         this.orderService = orderService;
         this.paymentService = paymentService;
+        this.deliveryService = deliveryService;
         this.authenticationService = authenticationService;
         this.customerService = customerService;
         this.scanner = scanner;
@@ -136,7 +140,9 @@ public class CustomerMenu {
             return;
         }
         System.out.println("Categories:");
-        categories.forEach(category -> System.out.println(category.getId() + " - " + category.getName()));
+        System.out.printf("%-8s %-20s%n", "ID", "Name");
+        System.out.println("----------------------------");
+        categories.forEach(category -> System.out.printf("%-8d %-20s%n", category.getId(), category.getName()));
     }
 
     private void viewMenu() {
@@ -154,13 +160,25 @@ public class CustomerMenu {
                 System.out.println("Invalid category id.");
                 return;
             }
-            items = menuService.getMenuItemsByCategory(categoryId);
+            items = menuService.getMenuItemsByCategory(categoryId).stream()
+                    .filter(MenuItem::isAvailable)
+                    .toList();
         }
         if (items.isEmpty()) {
             System.out.println("No menu items available.");
             return;
         }
-        items.forEach(item -> System.out.printf("%s - %s - %.2f - available=%s%n", item.getId(), item.getName(), item.getPrice(), item.isAvailable()));
+        System.out.println("Menu items:");
+        System.out.printf("%-8s %-20s %-12s %-20s%n", "ID", "Name", "Price", "Category");
+        System.out.println("---------------------------------------------------");
+        items.forEach(item -> {
+            String categoryName = categoryService.getAllCategories().stream()
+                    .filter(category -> category.getId() == item.getCategoryId())
+                    .map(Category::getName)
+                    .findFirst()
+                    .orElse("Unknown");
+            System.out.printf("%-8d %-20s %-12.2f %-20s%n", item.getId(), item.getName(), item.getPrice(), categoryName);
+        });
     }
 
     private void manageCart() {
@@ -257,10 +275,12 @@ public class CustomerMenu {
             return;
         }
         System.out.println("Cart items:");
+        System.out.printf("%-20s %-10s %-12s%n", "Item", "Qty", "Subtotal");
+        System.out.println("------------------------------------");
         for (CartItem item : cart.getItems()) {
-            System.out.printf("%s x %d = %.2f%n", item.getMenuItem().getName(), item.getQuantity(), item.getSubtotal());
+            System.out.printf("%-20s %-10d %-12.2f%n", item.getMenuItem().getName(), item.getQuantity(), item.getSubtotal());
         }
-        System.out.println("Total: " + cart.getTotalAmount());
+        System.out.printf("%-20s %-10s %-12.2f%n", "Total", "", cart.getTotalAmount());
     }
 
     private void checkout() {
@@ -297,9 +317,12 @@ public class CustomerMenu {
             System.out.println("No orders found.");
             return;
         }
+        System.out.println("Current orders:");
+        System.out.printf("%-15s %-15s %-10s%n", "Order ID", "Status", "Total");
+        System.out.println("-----------------------------------");
         orders.stream()
                 .filter(order -> order.getStatus() != com.fooddelivery.enums.OrderStatus.DELIVERED && order.getStatus() != com.fooddelivery.enums.OrderStatus.CANCELLED)
-                .forEach(order -> System.out.printf("%s - status=%s - total=%.2f%n", order.getId(), order.getStatus(), order.getFinalAmount()));
+                .forEach(order -> System.out.printf("%-15s %-15s %-10.2f%n", order.getId(), order.getStatus(), order.getFinalAmount()));
     }
 
     private void viewOrderHistory() {
@@ -308,9 +331,56 @@ public class CustomerMenu {
             System.out.println("No order history available.");
             return;
         }
-        orders.forEach(order -> {
-            System.out.printf("%s - status=%s - total=%.2f%n", order.getId(), order.getStatus(), order.getFinalAmount());
-        });
+
+        System.out.println("Order history:");
+        System.out.printf("%-15s %-15s %-10s%n", "Order ID", "Status", "Total");
+        System.out.println("-----------------------------------");
+        orders.forEach(order -> System.out.printf("%-15s %-15s %-10.2f%n", order.getId(), order.getStatus(), order.getFinalAmount()));
+
+        System.out.print("Enter order id to view details (press enter to return to customer menu): ");
+        String orderId = scanner.nextLine().trim();
+        if (orderId.isBlank()) {
+            return;
+        }
+
+        try {
+            Order selectedOrder = orderService.getOrderById(orderId);
+            if (!selectedOrder.getCustomerId().equals(customer.getId())) {
+                System.out.println("This order does not belong to you.");
+                return;
+            }
+            showOrderDetails(selectedOrder);
+        } catch (Exception e) {
+            System.out.println("Invalid order id: " + e.getMessage());
+        }
+    }
+
+    private void showOrderDetails(Order order) {
+        String deliveryPersonName = "Not assigned";
+        if (order.getDeliveryPersonId() != null && !order.getDeliveryPersonId().isBlank()) {
+            try {
+                deliveryPersonName = deliveryService.getDeliveryPersonById(order.getDeliveryPersonId()).getName();
+            } catch (Exception ignored) {
+                deliveryPersonName = order.getDeliveryPersonId();
+            }
+        }
+
+        System.out.println("\nOrder Details");
+        System.out.println("Order ID     : " + order.getId());
+        System.out.println("Status       : " + order.getStatus());
+        System.out.println("Placed At    : " + order.getOrderDate());
+        System.out.println("Delivery Person: " + deliveryPersonName);
+        System.out.println("Items:");
+        System.out.printf("%-10s %-20s %-8s %-10s%n", "Item ID", "Name", "Qty", "Price");
+        System.out.println("------------------------------------------------------------");
+        for (OrderItem item : order.getItems()) {
+            System.out.printf("%-10d %-20s %-8d %-10.2f%n",
+                    item.getItemId(), item.getItemName(), item.getQuantity(), item.getUnitPrice());
+        }
+        System.out.println("------------------------------------------------------------");
+        System.out.printf("%-25s %.2f%n", "Original Amount:", order.getOriginalAmount());
+        System.out.printf("%-25s %.2f%n", "Discount:", order.getDiscountAmount());
+        System.out.printf("%-25s %.2f%n", "Final Amount:", order.getFinalAmount());
     }
 
     private void orderAgain() {

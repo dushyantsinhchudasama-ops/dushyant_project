@@ -1,1 +1,5 @@
-11Dal Rice120.0true
+11Dal Rice100.0true
+22pizza240.0true
+31Thali170.0false
+42pasta80.0true
+52sandwhich200.0true

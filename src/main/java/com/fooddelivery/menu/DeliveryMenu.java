@@ -82,8 +82,22 @@ public class DeliveryMenu {
                 System.out.println("This order is not assigned to you.");
                 return;
             }
-            System.out.println(order);
-            order.getItems().forEach(item -> System.out.println("  " + item));
+            System.out.println("\nOrder Details");
+            System.out.println("Order ID      : " + order.getId());
+            System.out.println("Customer ID   : " + order.getCustomerId());
+            System.out.println("Status        : " + order.getStatus());
+            System.out.println("Placed At     : " + order.getOrderDate().toLocalDate() + " " + order.getOrderDate().toLocalTime());
+            System.out.println("Items:");
+            System.out.printf("%-10s %-20s %-8s %-10s%n", "Item ID", "Name", "Qty", "Price");
+            System.out.println("------------------------------------------------------------");
+            for (com.fooddelivery.model.OrderItem item : order.getItems()) {
+                System.out.printf("%-10d %-20s %-8d %-10.2f%n",
+                        item.getItemId(), item.getItemName(), item.getQuantity(), item.getUnitPrice());
+            }
+            System.out.println("------------------------------------------------------------");
+            System.out.printf("%-25s %.2f%n", "Original Amount:", order.getOriginalAmount());
+            System.out.printf("%-25s %.2f%n", "Discount:", order.getDiscountAmount());
+            System.out.printf("%-25s %.2f%n", "Final Amount:", order.getFinalAmount());
         } catch (Exception e) {
             System.out.println("Failed to retrieve order: " + e.getMessage());
         }

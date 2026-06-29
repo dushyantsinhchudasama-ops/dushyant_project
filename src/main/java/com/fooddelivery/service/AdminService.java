@@ -7,7 +7,6 @@ import com.fooddelivery.model.AbstractUser;
 import com.fooddelivery.repository.UserRepository;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class AdminService {
@@ -21,7 +20,7 @@ public class AdminService {
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException("Email already registered: " + email);
         }
-        String id = UUID.randomUUID().toString();
+        String id = generateNextUserId();
         Admin admin = UserFactory.createAdmin(id, name, email, password);
         userRepository.save(admin);
         return admin;
@@ -47,5 +46,25 @@ public class AdminService {
             return;
         }
         createAdmin(name, email, password);
+    }
+
+    private String generateNextUserId() {
+        int maxId = userRepository.findAll().stream()
+                .map(AbstractUser::getId)
+                .mapToInt(this::parseNumericId)
+                .max()
+                .orElse(0);
+        return String.valueOf(maxId + 1);
+    }
+
+    private int parseNumericId(String id) {
+        if (id == null || id.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

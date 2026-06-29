@@ -8,7 +8,6 @@ import com.fooddelivery.model.Customer;
 import com.fooddelivery.repository.UserRepository;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CustomerService {
@@ -22,7 +21,7 @@ public class CustomerService {
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException("Email already registered: " + email);
         }
-        String id = UUID.randomUUID().toString();
+        String id = generateNextUserId();
         Customer customer = UserFactory.createCustomer(id, name, email, password, phoneNumber, address);
         userRepository.save(customer);
         return customer;
@@ -60,5 +59,25 @@ public class CustomerService {
         return userRepository.findByRole(Role.CUSTOMER).stream()
                 .map(user -> (Customer) user)
                 .collect(Collectors.toList());
+    }
+
+    private String generateNextUserId() {
+        int maxId = userRepository.findAll().stream()
+                .map(AbstractUser::getId)
+                .mapToInt(this::parseNumericId)
+                .max()
+                .orElse(0);
+        return String.valueOf(maxId + 1);
+    }
+
+    private int parseNumericId(String id) {
+        if (id == null || id.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

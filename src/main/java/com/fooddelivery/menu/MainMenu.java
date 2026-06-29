@@ -134,7 +134,7 @@ public class MainMenu {
         try {
             var user = authenticationService.login(email, password);
             if (user.getRole() == Role.CUSTOMER) {
-                new CustomerMenu((com.fooddelivery.model.Customer) user, categoryService, menuService, cartService, orderService, paymentService, authenticationService, customerService, scanner).start();
+                new CustomerMenu((com.fooddelivery.model.Customer) user, categoryService, menuService, cartService, orderService, paymentService, deliveryService, authenticationService, customerService, scanner).start();
             } else {
                 System.out.println("You are not authorized as customer.");
             }
