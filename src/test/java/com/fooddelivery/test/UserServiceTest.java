@@ -76,6 +76,31 @@ public class UserServiceTest {
     }
 
     @Test
+    void shouldAllowRegularAdminToCreateAdminButOnlySuperAdminToRemoveAdmin() {
+        Admin superAdmin = adminService.createAdmin(null, "Super Admin", "super@example.com", "superpass", true);
+        Admin createdByAdmin = adminService.createAdmin(superAdmin.getId(), "Regular Admin", "admin@example.com", "adminpass");
+
+        assertEquals(Role.ADMIN, createdByAdmin.getRole());
+        assertEquals(2, adminService.getAllAdmins().size());
+
+        assertThrows(IllegalStateException.class,
+                () -> adminService.removeAdmin(createdByAdmin.getId(), superAdmin.getId()));
+
+        adminService.removeAdmin(superAdmin.getId(), createdByAdmin.getId());
+        assertEquals(1, adminService.getAllAdmins().size());
+    }
+
+    @Test
+    void shouldConvertLegacyAdminIdsToNumericIds() {
+        userRepository.save(new Admin("legacy-admin-id", "Legacy Admin", "admin@fooddelivery.com", "pass"));
+
+        adminService.initializeDefaultAdmin("Super Admin", "admin@fooddelivery.com", "admin123");
+
+        Admin migratedAdmin = (Admin) userRepository.findByEmail("admin@fooddelivery.com").orElseThrow();
+        assertTrue(migratedAdmin.getId().chars().allMatch(Character::isDigit));
+    }
+
+    @Test
     void shouldNotAllowDuplicateEmailForCustomerRegistration() {
         customerService.registerCustomer("Sam", "sam@example.com", "pass", "9999999999", "34 Road");
         assertThrows(UserAlreadyExistsException.class,

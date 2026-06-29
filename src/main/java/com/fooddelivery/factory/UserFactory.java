@@ -11,7 +11,11 @@ public final class UserFactory {
     }
 
     public static Admin createAdmin(String id, String name, String email, String password) {
-        return new Admin(id, name, email, password);
+        return createAdmin(id, name, email, password, false);
+    }
+
+    public static Admin createAdmin(String id, String name, String email, String password, boolean superAdmin) {
+        return new Admin(id, name, email, password, superAdmin);
     }
 
     public static Customer createCustomer(String id, String name, String email, String password, String phoneNumber, String address) {

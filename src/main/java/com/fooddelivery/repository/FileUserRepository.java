@@ -122,7 +122,8 @@ public class FileUserRepository implements UserRepository {
         boolean available = Boolean.parseBoolean(parts[8]);
 
         return switch (role) {
-            case ADMIN -> UserFactory.createAdmin(id, name, email, password);
+            case SUPER_ADMIN -> UserFactory.createAdmin(id, name, email, password, true);
+            case ADMIN -> UserFactory.createAdmin(id, name, email, password, false);
             case CUSTOMER -> UserFactory.createCustomer(id, name, email, password, phoneNumber, address);
             case DELIVERY_PERSON -> {
                 DeliveryPerson deliveryPerson = UserFactory.createDeliveryPerson(id, name, email, password, phoneNumber, vehicleNumber);

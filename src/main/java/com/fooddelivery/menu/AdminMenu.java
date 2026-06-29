@@ -1,6 +1,8 @@
 package com.fooddelivery.menu;
 
 import com.fooddelivery.enums.OrderStatus;
+import com.fooddelivery.enums.Role;
+import com.fooddelivery.model.Admin;
 import com.fooddelivery.model.Category;
 import com.fooddelivery.model.DeliveryPerson;
 import com.fooddelivery.model.MenuItem;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class AdminMenu {
+    private final Admin currentAdmin;
     private final AdminService adminService;
     private final CategoryService categoryService;
     private final MenuService menuService;
@@ -24,13 +27,15 @@ public class AdminMenu {
     private final StatisticsService statisticsService;
     private final Scanner scanner;
 
-    public AdminMenu(AdminService adminService,
+    public AdminMenu(Admin currentAdmin,
+                     AdminService adminService,
                      CategoryService categoryService,
                      MenuService menuService,
                      DeliveryService deliveryService,
                      OrderService orderService,
                      StatisticsService statisticsService,
                      Scanner scanner) {
+        this.currentAdmin = currentAdmin;
         this.adminService = adminService;
         this.categoryService = categoryService;
         this.menuService = menuService;
@@ -51,7 +56,8 @@ public class AdminMenu {
                 case "3" -> manageDeliveryPersons();
                 case "4" -> manageOrders();
                 case "5" -> showStatistics();
-                case "6" -> running = false;
+                case "6" -> manageAdmins();
+                case "7" -> running = false;
                 default -> System.out.println("Invalid option. Please try again.");
             }
         }
@@ -64,7 +70,8 @@ public class AdminMenu {
         System.out.println("3. Delivery Person Management");
         System.out.println("4. Order Management");
         System.out.println("5. Statistics");
-        System.out.println("6. Logout");
+        System.out.println("6. Admin Management");
+        System.out.println("7. Logout");
         System.out.print("Choose an option: ");
     }
 
@@ -534,6 +541,87 @@ public class AdminMenu {
         } catch (Exception e) {
             System.out.println("Failed to cancel order: " + e.getMessage());
         }
+    }
+
+    private void manageAdmins() {
+        boolean running = true;
+        while (running) {
+            System.out.println("\n-- Admin Management --");
+            System.out.println("1. Add Admin");
+            if (isSuperAdmin()) {
+                System.out.println("2. Remove Admin");
+                System.out.println("3. View Admins");
+                System.out.println("4. Back");
+            } else {
+                System.out.println("2. View Admins");
+                System.out.println("3. Back");
+            }
+            System.out.print("Choose an option: ");
+            String option = scanner.nextLine().trim();
+            switch (option) {
+                case "1" -> addAdmin();
+                case "2" -> {
+                    if (isSuperAdmin()) {
+                        removeAdmin();
+                    } else {
+                        viewAdmins();
+                    }
+                }
+                case "3" -> {
+                    if (isSuperAdmin()) {
+                        viewAdmins();
+                    } else {
+                        running = false;
+                    }
+                }
+                case "4" -> running = false;
+                default -> System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private void addAdmin() {
+        System.out.print("Admin name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Admin email: ");
+        String email = scanner.nextLine().trim();
+        System.out.print("Admin password: ");
+        String password = scanner.nextLine().trim();
+        try {
+            Admin created = adminService.createAdmin(currentAdmin.getId(), name, email, password);
+            System.out.println("Admin added: " + created.getName());
+        } catch (Exception e) {
+            System.out.println("Failed to add admin: " + e.getMessage());
+        }
+    }
+
+    private void removeAdmin() {
+        viewAdmins();
+        System.out.print("Enter admin id to remove: ");
+        String adminId = scanner.nextLine().trim();
+        try {
+            adminService.removeAdmin(currentAdmin.getId(), adminId);
+            System.out.println("Admin removed.");
+        } catch (Exception e) {
+            System.out.println("Failed to remove admin: " + e.getMessage());
+        }
+    }
+
+    private void viewAdmins() {
+        List<Admin> admins = adminService.getAllAdmins();
+        if (admins.isEmpty()) {
+            System.out.println("No admins found.");
+            return;
+        }
+        System.out.println("Admins:");
+        System.out.printf("%-12s %-20s %-25s %-12s%n", "ID", "Name", "Email", "Role");
+        System.out.println("-------------------------------------------------------------");
+        admins.forEach(admin -> System.out.printf("%-12s %-20s %-25s %-12s%n",
+                admin.getId(), admin.getName(), admin.getEmail(), admin.getRole()));
+    }
+
+    private boolean isSuperAdmin() {
+        return currentAdmin.getRole() == Role.SUPER_ADMIN;
     }
 
     private void showStatistics() {

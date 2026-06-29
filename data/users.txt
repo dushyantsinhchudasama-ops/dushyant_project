@@ -1,3 +1,4 @@
-f1512069-817c-42f9-90c1-2e2058c68f21ADMINSuper Adminadmin@fooddelivery.comadmin123false
 1DELIVERY_PERSONtest persontestdel@mail.com1234512345gj03jh9803true
 2CUSTOMERDushyantdushyant@mail.com1234512345Rajkotfalse
+3ADMINSuper Adminadmin@fooddelivery.comadmin123false
+4ADMINadmin1admin1@mail.comadmin123false

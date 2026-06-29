@@ -83,8 +83,8 @@ public class MainMenu {
         String password = scanner.nextLine().trim();
         try {
             AbstractUser user = authenticationService.login(email, password);
-            if (user.getRole() == Role.ADMIN) {
-                new AdminMenu(adminService, categoryService, menuService, deliveryService, orderService, statisticsService, scanner).start();
+            if (user.getRole() == Role.ADMIN || user.getRole() == Role.SUPER_ADMIN) {
+                new AdminMenu((com.fooddelivery.model.Admin) user, adminService, categoryService, menuService, deliveryService, orderService, statisticsService, scanner).start();
             } else {
                 System.out.println("You are not authorized as admin.");
             }

@@ -1,5 +1,6 @@
 package com.fooddelivery.service;
 
+import com.fooddelivery.enums.Role;
 import com.fooddelivery.exception.UserAlreadyExistsException;
 import com.fooddelivery.factory.UserFactory;
 import com.fooddelivery.model.Admin;
@@ -17,18 +18,28 @@ public class AdminService {
     }
 
     public Admin createAdmin(String name, String email, String password) {
+        return createAdmin(null, name, email, password, false);
+    }
+
+    public Admin createAdmin(String actorId, String name, String email, String password) {
+        return createAdmin(actorId, name, email, password, false);
+    }
+
+    public Admin createAdmin(String actorId, String name, String email, String password, boolean superAdmin) {
+        ensureAuthorizedToManageAdmins(actorId);
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException("Email already registered: " + email);
         }
         String id = generateNextUserId();
-        Admin admin = UserFactory.createAdmin(id, name, email, password);
+        Admin admin = UserFactory.createAdmin(id, name, email, password, superAdmin);
         userRepository.save(admin);
         return admin;
     }
 
     public List<Admin> getAllAdmins() {
-        return userRepository.findByRole(com.fooddelivery.enums.Role.ADMIN).stream()
-                .map(user -> (Admin) user)
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole() == Role.ADMIN || user.getRole() == Role.SUPER_ADMIN)
+                .map(Admin.class::cast)
                 .collect(Collectors.toList());
     }
 
@@ -41,11 +52,50 @@ public class AdminService {
         return (Admin) user;
     }
 
+    public void removeAdmin(String actorId, String adminId) {
+        ensureSuperAdmin(actorId);
+        AbstractUser target = userRepository.findById(adminId)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found: " + adminId));
+        if (!(target instanceof Admin)) {
+            throw new IllegalArgumentException("User is not an admin: " + adminId);
+        }
+        if (adminId.equals(actorId)) {
+            throw new IllegalStateException("Super admin cannot remove their own account.");
+        }
+        userRepository.deleteById(adminId);
+    }
+
     public void initializeDefaultAdmin(String name, String email, String password) {
-        if (userRepository.findByEmail(email).isPresent()) {
+        AbstractUser existingUser = userRepository.findByEmail(email).orElse(null);
+        if (existingUser == null) {
+            createAdmin(null, name, email, password, true);
             return;
         }
-        createAdmin(name, email, password);
+        if (existingUser instanceof Admin admin && !isNumericId(admin.getId())) {
+            String newId = generateNextUserId();
+            Admin migratedAdmin = new Admin(newId, admin.getName(), admin.getEmail(), admin.getPassword(), admin.getRole() == Role.SUPER_ADMIN);
+            userRepository.deleteById(admin.getId());
+            userRepository.save(migratedAdmin);
+        }
+    }
+
+    private void ensureAuthorizedToManageAdmins(String actorId) {
+        if (actorId == null || actorId.isBlank()) {
+            return;
+        }
+        AbstractUser actor = userRepository.findById(actorId)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found: " + actorId));
+        if (actor.getRole() != Role.ADMIN && actor.getRole() != Role.SUPER_ADMIN) {
+            throw new IllegalStateException("Only admins can manage admin accounts.");
+        }
+    }
+
+    private void ensureSuperAdmin(String actorId) {
+        AbstractUser actor = userRepository.findById(actorId)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found: " + actorId));
+        if (actor.getRole() != Role.SUPER_ADMIN) {
+            throw new IllegalStateException("Only a super admin can remove admin accounts.");
+        }
     }
 
     private String generateNextUserId() {
@@ -55,6 +105,18 @@ public class AdminService {
                 .max()
                 .orElse(0);
         return String.valueOf(maxId + 1);
+    }
+
+    private boolean isNumericId(String id) {
+        if (id == null || id.isBlank()) {
+            return false;
+        }
+        try {
+            Integer.parseInt(id);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private int parseNumericId(String id) {
