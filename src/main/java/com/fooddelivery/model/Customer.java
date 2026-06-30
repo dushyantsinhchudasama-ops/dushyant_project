@@ -4,12 +4,16 @@ import com.fooddelivery.enums.Role;
 
 public class Customer extends AbstractUser {
     private String phoneNumber;
-    private String address;
+    private String houseNo;
+    private String mainAddress;
+    private String pincode;
 
-    public Customer(String id, String name, String email, String password, String phoneNumber, String address) {
+    public Customer(String id, String name, String email, String password, String phoneNumber, String houseNo, String mainAddress, String pincode) {
         super(id, name, email, password, Role.CUSTOMER);
         this.phoneNumber = phoneNumber;
-        this.address = address;
+        this.houseNo = houseNo;
+        this.mainAddress  = mainAddress;
+        this.pincode = pincode;
     }
 
     public String getPhoneNumber() {
@@ -20,13 +24,17 @@ public class Customer extends AbstractUser {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getAddress() {
-        return address;
+    public String getHouseNo() {
+        return houseNo;
     }
+    public String getMainAddress() {return mainAddress;}
+    public String getPincode() {return pincode;}
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setHouseNo(String houseNo) {
+        this.houseNo = houseNo;
     }
+    public void setMainAddress(String mainAddress) {this.mainAddress = mainAddress;}
+    public void setPincode(String pincode) {this.pincode = pincode;}
 
     @Override
     public String toString() {
@@ -35,7 +43,9 @@ public class Customer extends AbstractUser {
                 ", name='" + getName() + '\'' +
                 ", email='" + getEmail() + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
-                ", address='" + address + '\'' +
+                ", address='" + houseNo + '\'' +
+                ", address='" + mainAddress + '\'' +
+                ", address='" + pincode + '\'' +
                 '}';
     }
 }

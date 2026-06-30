@@ -5,11 +5,7 @@ import com.fooddelivery.observer.ConsoleNotificationObserver;
 import com.fooddelivery.observer.EmailNotificationObserver;
 import com.fooddelivery.observer.OrderStatusNotifier;
 import com.fooddelivery.observer.SmsNotificationObserver;
-import com.fooddelivery.repository.FileCategoryRepository;
-import com.fooddelivery.repository.FileMenuRepository;
-import com.fooddelivery.repository.FileOrderRepository;
-import com.fooddelivery.repository.FileUserRepository;
-import com.fooddelivery.repository.UserRepository;
+import com.fooddelivery.repository.*;
 import com.fooddelivery.service.AdminService;
 import com.fooddelivery.service.AuthenticationService;
 import com.fooddelivery.service.CartService;
@@ -25,9 +21,9 @@ import com.fooddelivery.service.TieredDiscountPolicy;
 public class Application {
     public static void main(String[] args) {
         UserRepository userRepository = new FileUserRepository();
-        var categoryRepository = new FileCategoryRepository();
-        var menuRepository = new FileMenuRepository();
-        var orderRepository = new FileOrderRepository();
+        CategoryRepository categoryRepository = new FileCategoryRepository();
+        MenuRepository menuRepository = new FileMenuRepository();
+        OrderRepository orderRepository = new FileOrderRepository();
 
         AuthenticationService authenticationService = new AuthenticationService(userRepository);
         AdminService adminService = new AdminService(userRepository);

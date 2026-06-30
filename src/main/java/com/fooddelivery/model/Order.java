@@ -18,7 +18,9 @@ public class Order {
     private final double discountAmount;
     private final double finalAmount;
     private final PaymentType paymentType;
-    private final String deliveryAddress;
+    private final String houseNO;
+    private final String mainAddress;
+    private final String pincode;
     private OrderStatus status;
     private final LocalDateTime orderDate;
 
@@ -31,7 +33,9 @@ public class Order {
                  double discountAmount,
                  double finalAmount,
                  PaymentType paymentType,
-                 String deliveryAddress,
+                 String houseNO,
+                 String mainAddress,
+                 String pincode,
                  OrderStatus status,
                  LocalDateTime orderDate) {
         this.id = id;
@@ -45,7 +49,9 @@ public class Order {
         this.discountAmount = discountAmount;
         this.finalAmount = finalAmount;
         this.paymentType = paymentType;
-        this.deliveryAddress = deliveryAddress;
+        this.houseNO = houseNO;
+        this.mainAddress = mainAddress;
+        this.pincode = pincode;
         this.status = status;
         this.orderDate = orderDate;
     }
@@ -90,8 +96,16 @@ public class Order {
         return paymentType;
     }
 
-    public String getDeliveryAddress() {
-        return deliveryAddress;
+    public String getHouseNO() {
+        return houseNO;
+    }
+
+    public String getPincode() {
+        return pincode;
+    }
+
+    public String getMainAddress() {
+        return mainAddress;
     }
 
     public OrderStatus getStatus() {

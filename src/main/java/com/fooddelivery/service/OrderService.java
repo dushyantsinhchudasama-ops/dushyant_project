@@ -32,7 +32,7 @@ public class OrderService {
         this.deliveryService = deliveryService;
     }
 
-    public Order placeOrder(String customerId, String deliveryAddress, Cart cart, com.fooddelivery.strategy.PaymentStrategy paymentStrategy) {
+    public Order placeOrder(String customerId, String houseNo, String mainAddressm, String pincode, Cart cart, com.fooddelivery.strategy.PaymentStrategy paymentStrategy) {
         if (cart == null || cart.isEmpty()) {
             throw new IllegalArgumentException("Cart cannot be empty.");
         }
@@ -55,7 +55,9 @@ public class OrderService {
                 bill.getDiscountAmount(),
                 bill.getFinalAmount(),
                 bill.getPaymentType(),
-                deliveryAddress,
+                houseNo,
+                mainAddressm,
+                pincode,
                 OrderStatus.PLACED,
                 LocalDateTime.now());
         orderRepository.save(order);

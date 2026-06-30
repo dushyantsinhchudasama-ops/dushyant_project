@@ -1,7 +1,7 @@
 package com.fooddelivery.service;
 
 import com.fooddelivery.enums.Role;
-import com.fooddelivery.exception.UserAlreadyExistsException;
+import com.fooddelivery.exception.AlreadyExistsException;
 import com.fooddelivery.factory.UserFactory;
 import com.fooddelivery.model.AbstractUser;
 import com.fooddelivery.model.DeliveryPerson;
@@ -18,8 +18,9 @@ public class DeliveryService {
     }
 
     public DeliveryPerson addDeliveryPerson(String name, String email, String password, String phoneNumber, String vehicleNumber) {
-        if (userRepository.existsByEmail(email)) {
-            throw new UserAlreadyExistsException("Email already registered: " + email);
+        if (userRepository.existsByEmail(email))
+        {
+            throw new AlreadyExistsException("Email already registered: " + email);
         }
         String id = generateNextUserId();
         DeliveryPerson deliveryPerson = UserFactory.createDeliveryPerson(id, name, email, password, phoneNumber, vehicleNumber);
@@ -35,7 +36,7 @@ public class DeliveryService {
         }
 
         if (!deliveryPerson.getEmail().equalsIgnoreCase(email) && userRepository.existsByEmail(email)) {
-            throw new UserAlreadyExistsException("Email already registered: " + email);
+            throw new AlreadyExistsException("Email already registered: " + email);
         }
 
         deliveryPerson.setName(name);

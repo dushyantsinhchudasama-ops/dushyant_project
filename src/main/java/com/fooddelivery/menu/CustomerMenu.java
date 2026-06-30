@@ -100,7 +100,9 @@ public class CustomerMenu {
         System.out.println("Name: " + customer.getName());
         System.out.println("Email: " + customer.getEmail());
         System.out.println("Phone: " + customer.getPhoneNumber());
-        System.out.println("Address: " + customer.getAddress());
+        System.out.println("House No: " + customer.getHouseNo());
+        System.out.println("Main Address: " + customer.getMainAddress());
+        System.out.println("Pincode: " + customer.getPincode());
     }
 
     private void updateProfile() {
@@ -110,10 +112,14 @@ public class CustomerMenu {
         String email = scanner.nextLine().trim();
         System.out.print("Phone: ");
         String phone = scanner.nextLine().trim();
-        System.out.print("Address: ");
-        String address = scanner.nextLine().trim();
+        System.out.print("House No: ");
+        String houseNo = scanner.nextLine().trim();
+        System.out.print("Main Address: ");
+        String mainAddress = scanner.nextLine().trim();
+        System.out.print("Pincode: ");
+        String pincode = scanner.nextLine().trim();
         try {
-            Customer updated = customerService.updateProfile(customer.getId(), name, email, phone, address);
+            Customer updated = customerService.updateProfile(customer.getId(), name, email, phone, houseNo, mainAddress, pincode);
             System.out.println("Profile updated.");
         } catch (Exception e) {
             System.out.println("Failed to update profile: " + e.getMessage());
@@ -292,12 +298,25 @@ public class CustomerMenu {
         System.out.println("Deliver to current address? (Y/N)");
         System.out.print("Option: ");
         String deliveryOption = scanner.nextLine().trim();
-        String deliveryAddress = customer.getAddress();
+        String houseNo = customer.getHouseNo();
+        String mainAddress = customer.getMainAddress();
+        String pincode = customer.getPincode();
         if (!deliveryOption.equalsIgnoreCase("Y")) {
-            System.out.print("Enter delivery address: ");
-            deliveryAddress = scanner.nextLine().trim();
-            if (deliveryAddress.isBlank()) {
-                deliveryAddress = customer.getAddress();
+            System.out.println("Enter delivery Details: ");
+            System.out.print("Enter House No: ");
+            houseNo = scanner.nextLine().trim();
+            System.out.print("Enter Main address: ");
+            mainAddress = scanner.nextLine().trim();
+            System.out.print("Enter Pincode: ");
+            pincode = scanner.nextLine().trim();
+            if (houseNo.isBlank()) {
+                houseNo = customer.getHouseNo();
+            }
+            if (mainAddress.isBlank()) {
+                mainAddress = customer.getMainAddress();
+            }
+            if (pincode.isBlank()) {
+                pincode = customer.getPincode();
             }
         }
 
@@ -314,7 +333,7 @@ public class CustomerMenu {
                 case "3" -> new UpiPaymentStrategy(paymentService.getDiscountPolicy());
                 default -> throw new IllegalArgumentException("Invalid payment option.");
             };
-            Order order = orderService.placeOrder(customer.getId(), deliveryAddress, cart, strategy);
+            Order order = orderService.placeOrder(customer.getId(), houseNo, mainAddress, pincode, cart, strategy);
             cartService.clearCart(customer.getId());
             System.out.println("Order placed successfully: " + order.getId());
             System.out.println("Total payable: " + order.getFinalAmount());

@@ -2,7 +2,7 @@ package com.fooddelivery.test;
 
 import com.fooddelivery.enums.Role;
 import com.fooddelivery.exception.InvalidCredentialsException;
-import com.fooddelivery.exception.UserAlreadyExistsException;
+import com.fooddelivery.exception.AlreadyExistsException;
 import com.fooddelivery.model.Admin;
 import com.fooddelivery.model.Customer;
 import com.fooddelivery.model.DeliveryPerson;
@@ -103,7 +103,7 @@ public class UserServiceTest {
     @Test
     void shouldNotAllowDuplicateEmailForCustomerRegistration() {
         customerService.registerCustomer("Sam", "sam@example.com", "pass", "9999999999", "34 Road");
-        assertThrows(UserAlreadyExistsException.class,
+        assertThrows(AlreadyExistsException.class,
                 () -> customerService.registerCustomer("Sam Two", "sam@example.com", "pass2", "8888888888", "35 Road"));
     }
 

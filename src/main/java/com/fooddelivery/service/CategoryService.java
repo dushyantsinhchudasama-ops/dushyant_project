@@ -1,7 +1,7 @@
 package com.fooddelivery.service;
 
 import com.fooddelivery.exception.CategoryNotFoundException;
-import com.fooddelivery.exception.UserAlreadyExistsException;
+import com.fooddelivery.exception.AlreadyExistsException;
 import com.fooddelivery.model.Category;
 import com.fooddelivery.repository.CategoryRepository;
 
@@ -16,7 +16,7 @@ public class CategoryService {
 
     public Category addCategory(String name) {
         if (categoryRepository.existsByName(name)) {
-            throw new UserAlreadyExistsException("Category already exists: " + name);
+            throw new AlreadyExistsException("Category already exists: " + name);
         }
         int id = getNextCategoryId();
         Category category = new Category(id, name);
@@ -29,7 +29,7 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found: " + categoryId));
 
         if (!category.getName().equalsIgnoreCase(name) && categoryRepository.existsByName(name)) {
-            throw new UserAlreadyExistsException("Category already exists: " + name);
+            throw new AlreadyExistsException("Category already exists: " + name);
         }
 
         category.setName(name);

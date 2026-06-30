@@ -107,7 +107,7 @@ public class FileUserRepository implements UserRepository {
 
     private AbstractUser parseLine(String line) {
         String[] parts = line.split(DELIMITER, -1);
-        if (parts.length != 9) {
+        if (parts.length != 11) {
             throw new DataAccessException("Invalid user record: " + line);
         }
 
@@ -117,14 +117,16 @@ public class FileUserRepository implements UserRepository {
         String email = parts[3];
         String password = parts[4];
         String phoneNumber = parts[5];
-        String address = parts[6];
-        String vehicleNumber = parts[7];
-        boolean available = Boolean.parseBoolean(parts[8]);
+        String houseNo = parts[6];
+        String mainAddress = parts[7];
+        String pincode = parts[8];
+        String vehicleNumber = parts[9];
+        boolean available = Boolean.parseBoolean(parts[10]);
 
         return switch (role) {
             case SUPER_ADMIN -> UserFactory.createAdmin(id, name, email, password, true);
             case ADMIN -> UserFactory.createAdmin(id, name, email, password, false);
-            case CUSTOMER -> UserFactory.createCustomer(id, name, email, password, phoneNumber, address);
+            case CUSTOMER -> UserFactory.createCustomer(id, name, email, password, phoneNumber, houseNo, mainAddress, pincode);
             case DELIVERY_PERSON -> {
                 DeliveryPerson deliveryPerson = UserFactory.createDeliveryPerson(id, name, email, password, phoneNumber, vehicleNumber);
                 deliveryPerson.setAvailable(available);
@@ -152,13 +154,17 @@ public class FileUserRepository implements UserRepository {
 
     private String formatUser(AbstractUser user) {
         String phoneNumber = "";
-        String address = "";
+        String houseNo = "";
+        String mainAddress = "";
+        String pincode = "";
         String vehicleNumber = "";
         String available = "false";
 
         if (user instanceof Customer customer) {
             phoneNumber = customer.getPhoneNumber();
-            address = customer.getAddress();
+            houseNo = customer.getHouseNo();
+            mainAddress = customer.getMainAddress();
+            pincode = customer.getPincode();
         } else if (user instanceof DeliveryPerson deliveryPerson) {
             phoneNumber = deliveryPerson.getPhoneNumber();
             vehicleNumber = deliveryPerson.getVehicleNumber();
@@ -172,7 +178,9 @@ public class FileUserRepository implements UserRepository {
                 user.getEmail(),
                 user.getPassword(),
                 phoneNumber,
-                address,
+                houseNo,
+                mainAddress,
+                pincode,
                 vehicleNumber,
                 available
         );

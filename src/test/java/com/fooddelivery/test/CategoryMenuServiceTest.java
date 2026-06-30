@@ -2,7 +2,7 @@ package com.fooddelivery.test;
 
 import com.fooddelivery.exception.CategoryNotFoundException;
 import com.fooddelivery.exception.MenuItemNotFoundException;
-import com.fooddelivery.exception.UserAlreadyExistsException;
+import com.fooddelivery.exception.AlreadyExistsException;
 import com.fooddelivery.model.Category;
 import com.fooddelivery.model.MenuItem;
 import com.fooddelivery.repository.CategoryRepository;
@@ -61,7 +61,7 @@ public class CategoryMenuServiceTest {
     @Test
     void shouldNotAllowDuplicateCategory() {
         categoryService.addCategory("Italian");
-        assertThrows(UserAlreadyExistsException.class, () -> categoryService.addCategory("Italian"));
+        assertThrows(AlreadyExistsException.class, () -> categoryService.addCategory("Italian"));
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.fooddelivery.service;
 
 import com.fooddelivery.enums.Role;
-import com.fooddelivery.exception.UserAlreadyExistsException;
+import com.fooddelivery.exception.AlreadyExistsException;
 import com.fooddelivery.factory.UserFactory;
 import com.fooddelivery.model.AbstractUser;
 import com.fooddelivery.model.Customer;
@@ -17,17 +17,17 @@ public class CustomerService {
         this.userRepository = userRepository;
     }
 
-    public Customer registerCustomer(String name, String email, String password, String phoneNumber, String address) {
+    public Customer registerCustomer(String name, String email, String password, String phoneNumber, String houseNo, String mainAddress, String pincode) {
         if (userRepository.existsByEmail(email)) {
-            throw new UserAlreadyExistsException("Email already registered: " + email);
+            throw new AlreadyExistsException("Email already registered: " + email);
         }
         String id = generateNextUserId();
-        Customer customer = UserFactory.createCustomer(id, name, email, password, phoneNumber, address);
+        Customer customer = UserFactory.createCustomer(id, name, email, password, phoneNumber, houseNo, mainAddress, pincode);
         userRepository.save(customer);
         return customer;
     }
 
-    public Customer updateProfile(String customerId, String name, String email, String phoneNumber, String address) {
+    public Customer updateProfile(String customerId, String name, String email, String phoneNumber, String houseNo, String mainAddress, String pincode) {
         AbstractUser found = userRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + customerId));
         if (!(found instanceof Customer customer)) {
@@ -35,13 +35,15 @@ public class CustomerService {
         }
 
         if (!customer.getEmail().equalsIgnoreCase(email) && userRepository.existsByEmail(email)) {
-            throw new UserAlreadyExistsException("Email already registered: " + email);
+            throw new AlreadyExistsException("Email already registered: " + email);
         }
 
         customer.setName(name);
         customer.setEmail(email);
         customer.setPhoneNumber(phoneNumber);
-        customer.setAddress(address);
+        customer.setHouseNo(houseNo);
+        customer.setMainAddress(mainAddress);
+        customer.setPincode(pincode);
         userRepository.update(customer);
         return customer;
     }

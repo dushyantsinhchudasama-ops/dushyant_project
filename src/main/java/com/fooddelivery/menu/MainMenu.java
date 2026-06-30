@@ -116,8 +116,12 @@ public class MainMenu {
         String password = scanner.nextLine().trim();
         System.out.print("Phone number: ");
         String phone = scanner.nextLine().trim();
-        System.out.print("Address: ");
-        String address = scanner.nextLine().trim();
+        System.out.print("House / Flat NO: ");
+        String houseNo = scanner.nextLine().trim();
+        System.out.print("Main Address Line: ");
+        String mainAddress = scanner.nextLine().trim();
+        System.out.println("Pincode: ");
+        String pincode = scanner.nextLine().trim();
         try {
             var customer = customerService.registerCustomer(name, email, password, phone, address);
             System.out.println("Registration successful. Please login.");

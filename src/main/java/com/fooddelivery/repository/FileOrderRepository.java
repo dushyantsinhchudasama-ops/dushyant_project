@@ -175,7 +175,9 @@ public class FileOrderRepository implements OrderRepository {
         }
 
         String paymentType = parts[7];
-        String deliveryAddress = "";
+        String houseNo = "";
+        String mainAddress = "";
+        String pincode = "";
         int statusIndex = 8;
         int dateIndex = 9;
 
@@ -209,7 +211,9 @@ public class FileOrderRepository implements OrderRepository {
                 discountAmount,
                 finalAmount,
                 com.fooddelivery.enums.PaymentType.valueOf(paymentType),
-                deliveryAddress,
+                houseNo,
+                mainAddress,
+                pincode,
                 status,
                 orderDate);
     }
@@ -246,7 +250,9 @@ public class FileOrderRepository implements OrderRepository {
                 String.valueOf(order.getDiscountAmount()),
                 String.valueOf(order.getFinalAmount()),
                 order.getPaymentType().name(),
-                order.getDeliveryAddress() == null ? "" : order.getDeliveryAddress(),
+                order.getHouseNO() == null ? "" : order.getHouseNO(),
+                order.getMainAddress() == null ? "" : order.getMainAddress(),
+                order.getPincode() == null ? "" : order.getPincode(),
                 order.getStatus().name(),
                 order.getOrderDate().toString()
         );

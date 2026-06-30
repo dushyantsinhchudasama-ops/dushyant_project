@@ -1,7 +1,7 @@
 package com.fooddelivery.service;
 
 import com.fooddelivery.enums.Role;
-import com.fooddelivery.exception.UserAlreadyExistsException;
+import com.fooddelivery.exception.AlreadyExistsException;
 import com.fooddelivery.factory.UserFactory;
 import com.fooddelivery.model.Admin;
 import com.fooddelivery.model.AbstractUser;
@@ -28,7 +28,7 @@ public class AdminService {
     public Admin createAdmin(String actorId, String name, String email, String password, boolean superAdmin) {
         ensureAuthorizedToManageAdmins(actorId);
         if (userRepository.existsByEmail(email)) {
-            throw new UserAlreadyExistsException("Email already registered: " + email);
+            throw new AlreadyExistsException("Email already registered: " + email);
         }
         String id = generateNextUserId();
         Admin admin = UserFactory.createAdmin(id, name, email, password, superAdmin);

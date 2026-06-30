@@ -18,8 +18,8 @@ public final class UserFactory {
         return new Admin(id, name, email, password, superAdmin);
     }
 
-    public static Customer createCustomer(String id, String name, String email, String password, String phoneNumber, String address) {
-        return new Customer(id, name, email, password, phoneNumber, address);
+    public static Customer createCustomer(String id, String name, String email, String password, String phoneNumber, String houseNo, String mainAddress, String pincode) {
+        return new Customer(id, name, email, password, phoneNumber, houseNo, mainAddress, pincode);
     }
 
     public static DeliveryPerson createDeliveryPerson(String id, String name, String email, String password, String phoneNumber, String vehicleNumber) {
