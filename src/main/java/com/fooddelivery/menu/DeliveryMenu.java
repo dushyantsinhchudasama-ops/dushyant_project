@@ -86,7 +86,8 @@ public class DeliveryMenu {
             System.out.println("Order ID      : " + order.getId());
             System.out.println("Customer ID   : " + order.getCustomerId());
             System.out.println("Status        : " + order.getStatus());
-            System.out.println("Placed At     : " + order.getOrderDate().toLocalDate() + " " + order.getOrderDate().toLocalTime());
+            System.out.println("Placed At     : " + order.getOrderDate().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
+            System.out.println("Delivery Address: " + order.getDeliveryAddress());
             System.out.println("Items:");
             System.out.printf("%-10s %-20s %-8s %-10s%n", "Item ID", "Name", "Qty", "Price");
             System.out.println("------------------------------------------------------------");

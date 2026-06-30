@@ -18,6 +18,7 @@ public class Order {
     private final double discountAmount;
     private final double finalAmount;
     private final PaymentType paymentType;
+    private final String deliveryAddress;
     private OrderStatus status;
     private final LocalDateTime orderDate;
 
@@ -30,6 +31,7 @@ public class Order {
                  double discountAmount,
                  double finalAmount,
                  PaymentType paymentType,
+                 String deliveryAddress,
                  OrderStatus status,
                  LocalDateTime orderDate) {
         this.id = id;
@@ -43,6 +45,7 @@ public class Order {
         this.discountAmount = discountAmount;
         this.finalAmount = finalAmount;
         this.paymentType = paymentType;
+        this.deliveryAddress = deliveryAddress;
         this.status = status;
         this.orderDate = orderDate;
     }
@@ -87,6 +90,10 @@ public class Order {
         return paymentType;
     }
 
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
     public OrderStatus getStatus() {
         return status;
     }
@@ -111,6 +118,7 @@ public class Order {
                 ", discountAmount=" + discountAmount +
                 ", finalAmount=" + finalAmount +
                 ", paymentType=" + paymentType +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
                 ", status=" + status +
                 ", orderDate=" + orderDate +
                 '}';

@@ -96,7 +96,7 @@ class FoodDeliveryCoreServicesTest {
         OrderObserver observer = order -> notifications.add(order.getId());
         notifier.registerObserver(observer);
 
-        Order order = new Order("10", "cust-1", null, List.of(), 100.0, 0.0, 0.0, 100.0, PaymentType.CASH, OrderStatus.PLACED, java.time.LocalDateTime.now());
+        Order order = new Order("10", "cust-1", null, List.of(), 100.0, 0.0, 0.0, 100.0, PaymentType.CASH, "Current address", OrderStatus.PLACED, java.time.LocalDateTime.now());
         notifier.notifyObservers(order);
 
         assertEquals(List.of("10"), notifications);
@@ -119,8 +119,9 @@ class FoodDeliveryCoreServicesTest {
         cart.addItem(pizza, 1);
 
         PaymentStrategy paymentStrategy = cartToPay -> new Bill(cart.getTotalAmount(), 0.0, 0.0, cart.getTotalAmount(), PaymentType.CASH);
-        Order order = orderService.placeOrder("cust-1", cart, paymentStrategy);
+        Order order = orderService.placeOrder("cust-1", "10, Main Street", cart, paymentStrategy);
         assertEquals(OrderStatus.PLACED, order.getStatus());
+        assertEquals("10, Main Street", order.getDeliveryAddress());
 
         DeliveryPerson deliveryPerson = deliveryService.addDeliveryPerson("Ravi", "ravi2@example.com", "pass", "8888888888", "KA03EF4567");
         Order accepted = orderService.acceptOrder(order.getId());

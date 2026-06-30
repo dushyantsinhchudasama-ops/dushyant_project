@@ -20,7 +20,12 @@ public class FileCategoryRepository implements CategoryRepository {
 
     public FileCategoryRepository(String categoriesFile) {
         this.categoriesFile = categoriesFile;
-        loadCategories();
+//        loadCategories();
+        try {
+            loadCategories();
+        } catch (DataAccessException e) {
+            System.out.println("Failed to load categories!!!");
+        }
     }
 
     @Override

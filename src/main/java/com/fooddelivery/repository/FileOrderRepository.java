@@ -154,9 +154,10 @@ public class FileOrderRepository implements OrderRepository {
 
     private Order parseOrderLine(String line, List<OrderItem> items) {
         String[] parts = line.split(DELIMITER, -1);
-        if (parts.length != 10) {
+        if (parts.length != 10 && parts.length != 11) {
             throw new DataAccessException("Invalid order record: " + line);
         }
+
         String orderId = parts[0];
         String customerId = parts[1];
         String deliveryPersonId = parts[2].isBlank() ? null : parts[2];
@@ -172,15 +173,45 @@ public class FileOrderRepository implements OrderRepository {
         } catch (NumberFormatException e) {
             throw new DataAccessException("Invalid order number format: " + line, e);
         }
+
         String paymentType = parts[7];
-        OrderStatus status = OrderStatus.valueOf(parts[8]);
+        String deliveryAddress = "";
+        int statusIndex = 8;
+        int dateIndex = 9;
+
+        if (parts.length == 11) {
+            deliveryAddress = parts[8];
+            statusIndex = 9;
+            dateIndex = 10;
+        }
+
+        OrderStatus status;
+        try {
+            status = OrderStatus.valueOf(parts[statusIndex]);
+        } catch (IllegalArgumentException e) {
+            throw new DataAccessException("Invalid order status: " + line, e);
+        }
+
         LocalDateTime orderDate;
         try {
-            orderDate = LocalDateTime.parse(parts[9]);
+            orderDate = LocalDateTime.parse(parts[dateIndex]);
         } catch (DateTimeParseException e) {
             throw new DataAccessException("Invalid order date format: " + line, e);
         }
-        return new Order(orderId, customerId, deliveryPersonId, items, originalAmount, discountPercentage, discountAmount, finalAmount, com.fooddelivery.enums.PaymentType.valueOf(paymentType), status, orderDate);
+
+        return new Order(
+                orderId,
+                customerId,
+                deliveryPersonId,
+                items,
+                originalAmount,
+                discountPercentage,
+                discountAmount,
+                finalAmount,
+                com.fooddelivery.enums.PaymentType.valueOf(paymentType),
+                deliveryAddress,
+                status,
+                orderDate);
     }
 
     private int findIndexById(String id) {
@@ -215,6 +246,7 @@ public class FileOrderRepository implements OrderRepository {
                 String.valueOf(order.getDiscountAmount()),
                 String.valueOf(order.getFinalAmount()),
                 order.getPaymentType().name(),
+                order.getDeliveryAddress() == null ? "" : order.getDeliveryAddress(),
                 order.getStatus().name(),
                 order.getOrderDate().toString()
         );

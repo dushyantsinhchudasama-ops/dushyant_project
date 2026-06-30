@@ -289,6 +289,18 @@ public class CustomerMenu {
             System.out.println("Cart is empty.");
             return;
         }
+        System.out.println("Deliver to current address? (Y/N)");
+        System.out.print("Option: ");
+        String deliveryOption = scanner.nextLine().trim();
+        String deliveryAddress = customer.getAddress();
+        if (!deliveryOption.equalsIgnoreCase("Y")) {
+            System.out.print("Enter delivery address: ");
+            deliveryAddress = scanner.nextLine().trim();
+            if (deliveryAddress.isBlank()) {
+                deliveryAddress = customer.getAddress();
+            }
+        }
+
         System.out.println("Choose payment method:");
         System.out.println("1. Cash");
         System.out.println("2. Card");
@@ -302,7 +314,7 @@ public class CustomerMenu {
                 case "3" -> new UpiPaymentStrategy(paymentService.getDiscountPolicy());
                 default -> throw new IllegalArgumentException("Invalid payment option.");
             };
-            Order order = orderService.placeOrder(customer.getId(), cart, strategy);
+            Order order = orderService.placeOrder(customer.getId(), deliveryAddress, cart, strategy);
             cartService.clearCart(customer.getId());
             System.out.println("Order placed successfully: " + order.getId());
             System.out.println("Total payable: " + order.getFinalAmount());
@@ -368,7 +380,8 @@ public class CustomerMenu {
         System.out.println("\nOrder Details");
         System.out.println("Order ID     : " + order.getId());
         System.out.println("Status       : " + order.getStatus());
-        System.out.println("Placed At    : " + order.getOrderDate());
+        System.out.println("Placed At    : " + order.getOrderDate().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
+        System.out.println("Delivery Address: " + order.getDeliveryAddress());
         System.out.println("Delivery Person: " + deliveryPersonName);
         System.out.println("Items:");
         System.out.printf("%-10s %-20s %-8s %-10s%n", "Item ID", "Name", "Qty", "Price");
