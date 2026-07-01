@@ -2,12 +2,12 @@ C:\New folder\src\main\java\com\fooddelivery\Application.java
 C:\New folder\src\main\java\com\fooddelivery\enums\OrderStatus.java
 C:\New folder\src\main\java\com\fooddelivery\enums\PaymentType.java
 C:\New folder\src\main\java\com\fooddelivery\enums\Role.java
+C:\New folder\src\main\java\com\fooddelivery\exception\AlreadyExistsException.java
 C:\New folder\src\main\java\com\fooddelivery\exception\CategoryNotFoundException.java
 C:\New folder\src\main\java\com\fooddelivery\exception\DataAccessException.java
 C:\New folder\src\main\java\com\fooddelivery\exception\InvalidCredentialsException.java
 C:\New folder\src\main\java\com\fooddelivery\exception\MenuItemNotFoundException.java
 C:\New folder\src\main\java\com\fooddelivery\exception\OrderNotFoundException.java
-C:\New folder\src\main\java\com\fooddelivery\exception\UserAlreadyExistsException.java
 C:\New folder\src\main\java\com\fooddelivery\factory\UserFactory.java
 C:\New folder\src\main\java\com\fooddelivery\menu\AdminMenu.java
 C:\New folder\src\main\java\com\fooddelivery\menu\CustomerMenu.java

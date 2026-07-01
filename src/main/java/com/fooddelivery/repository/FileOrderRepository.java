@@ -154,7 +154,7 @@ public class FileOrderRepository implements OrderRepository {
 
     private Order parseOrderLine(String line, List<OrderItem> items) {
         String[] parts = line.split(DELIMITER, -1);
-        if (parts.length != 10 && parts.length != 11) {
+        if (parts.length < 10) {
             throw new DataAccessException("Invalid order record: " + line);
         }
 
@@ -175,14 +175,30 @@ public class FileOrderRepository implements OrderRepository {
         }
 
         String paymentType = parts[7];
+        String paymentDetails = "";
         String houseNo = "";
         String mainAddress = "";
         String pincode = "";
         int statusIndex = 8;
         int dateIndex = 9;
 
-        if (parts.length == 11) {
-            deliveryAddress = parts[8];
+        if (parts.length >= 14) {
+            houseNo = parts[8];
+            mainAddress = parts[9];
+            pincode = parts[10];
+            paymentDetails = parts[11];
+            statusIndex = 12;
+            dateIndex = 13;
+        } else if (parts.length >= 13) {
+            houseNo = parts[8];
+            mainAddress = parts[9];
+            pincode = parts[10];
+            statusIndex = 11;
+            dateIndex = 12;
+        } else if (parts.length == 11) {
+            houseNo = parts[8];
+            mainAddress = parts[9];
+            pincode = parts[10];
             statusIndex = 9;
             dateIndex = 10;
         }
@@ -211,6 +227,7 @@ public class FileOrderRepository implements OrderRepository {
                 discountAmount,
                 finalAmount,
                 com.fooddelivery.enums.PaymentType.valueOf(paymentType),
+                paymentDetails,
                 houseNo,
                 mainAddress,
                 pincode,
@@ -250,6 +267,7 @@ public class FileOrderRepository implements OrderRepository {
                 String.valueOf(order.getDiscountAmount()),
                 String.valueOf(order.getFinalAmount()),
                 order.getPaymentType().name(),
+                order.getPaymentDetails() == null ? "" : order.getPaymentDetails(),
                 order.getHouseNO() == null ? "" : order.getHouseNO(),
                 order.getMainAddress() == null ? "" : order.getMainAddress(),
                 order.getPincode() == null ? "" : order.getPincode(),

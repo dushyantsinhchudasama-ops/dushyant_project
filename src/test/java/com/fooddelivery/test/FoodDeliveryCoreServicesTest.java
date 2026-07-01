@@ -78,14 +78,16 @@ class FoodDeliveryCoreServicesTest {
     @Test
     void userFactoryShouldCreateExpectedUserTypes() {
         Admin admin = UserFactory.createAdmin("1", "Asha", "asha@example.com", "pass");
-        Customer customer = UserFactory.createCustomer("2", "Nina", "nina@example.com", "pass", "1111111111", "Road 1");
+        Customer customer = UserFactory.createCustomer("2", "Nina", "nina@example.com", "pass", "1111111111", "12", "Main Street", "560001");
         DeliveryPerson deliveryPerson = UserFactory.createDeliveryPerson("3", "Rohan", "rohan@example.com", "pass", "2222222222", "KA02CD3456");
 
         assertEquals(Role.ADMIN, admin.getRole());
         assertEquals(Role.CUSTOMER, customer.getRole());
         assertEquals(Role.DELIVERY_PERSON, deliveryPerson.getRole());
         assertEquals("Asha", admin.getName());
-        assertEquals("Road 1", customer.getAddress());
+        assertEquals("12", customer.getHouseNo());
+        assertEquals("Main Street", customer.getMainAddress());
+        assertEquals("560001", customer.getPincode());
         assertTrue(deliveryPerson.isAvailable());
     }
 
@@ -96,7 +98,7 @@ class FoodDeliveryCoreServicesTest {
         OrderObserver observer = order -> notifications.add(order.getId());
         notifier.registerObserver(observer);
 
-        Order order = new Order("10", "cust-1", null, List.of(), 100.0, 0.0, 0.0, 100.0, PaymentType.CASH, "Current address", OrderStatus.PLACED, java.time.LocalDateTime.now());
+        Order order = new Order("10", "cust-1", null, List.of(), 100.0, 0.0, 0.0, 100.0, PaymentType.CASH, "", "10", "Main Street", "560001", OrderStatus.PLACED, java.time.LocalDateTime.now());
         notifier.notifyObservers(order);
 
         assertEquals(List.of("10"), notifications);
@@ -118,10 +120,12 @@ class FoodDeliveryCoreServicesTest {
         Cart cart = new Cart("cust-1");
         cart.addItem(pizza, 1);
 
-        PaymentStrategy paymentStrategy = cartToPay -> new Bill(cart.getTotalAmount(), 0.0, 0.0, cart.getTotalAmount(), PaymentType.CASH);
-        Order order = orderService.placeOrder("cust-1", "10, Main Street", cart, paymentStrategy);
+        PaymentStrategy paymentStrategy = cartToPay -> new Bill(cart.getTotalAmount(), 0.0, 0.0, cart.getTotalAmount(), PaymentType.UPI);
+        Order order = orderService.placeOrder("cust-1", "10", "Main Street", "560001", cart, paymentStrategy, "user@upi");
         assertEquals(OrderStatus.PLACED, order.getStatus());
-        assertEquals("10, Main Street", order.getDeliveryAddress());
+        assertEquals("10, Main Street, 560001", order.getDeliveryAddress());
+        assertEquals("user@upi", order.getPaymentDetails());
+        assertEquals("upi", order.getPaymentMethodName());
 
         DeliveryPerson deliveryPerson = deliveryService.addDeliveryPerson("Ravi", "ravi2@example.com", "pass", "8888888888", "KA03EF4567");
         Order accepted = orderService.acceptOrder(order.getId());

@@ -1,4 +1,6 @@
-1DELIVERY_PERSONtest persontestdel@mail.com1234512345gj03jh9803true
-2CUSTOMERDushyantdushyant@mail.com1234512345Rajkotfalse
-3ADMINSuper Adminadmin@fooddelivery.comadmin123false
-4ADMINadmin1admin1@mail.comadmin123false
+1DELIVERY_PERSONTest Deliverytestdel@mail.com123451234567890gh03jh9803true
+2CUSTOMERDushyantdushyant@mail.com1234512345Rajkotfalse
+3ADMINSuper Adminadmin@fooddelivery.comadmin123false
+4ADMINadmin1admin1@mail.comadmin123false
+5CUSTOMERRamram@mail.com12345971280204172/h150 ft. ring road, rajkot360005false
+6CUSTOMERLaxmanlaxman@mail.com12345`1234567890123sdfsdf, sdff, sdf365201false

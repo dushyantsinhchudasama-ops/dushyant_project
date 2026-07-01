@@ -22,6 +22,7 @@ import com.fooddelivery.strategy.UpiPaymentStrategy;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class CustomerMenu {
     private final Customer customer;
@@ -327,19 +328,58 @@ public class CustomerMenu {
         System.out.print("Option: ");
         String option = scanner.nextLine().trim();
         try {
+            String paymentDetails = "";
             var strategy = switch (option) {
-                case "1" -> new CashPaymentStrategy(paymentService.getDiscountPolicy());
-                case "2" -> new CardPaymentStrategy(paymentService.getDiscountPolicy());
-                case "3" -> new UpiPaymentStrategy(paymentService.getDiscountPolicy());
+                case "1" -> {
+                    paymentDetails = "cash";
+                    yield new CashPaymentStrategy(paymentService.getDiscountPolicy());
+                }
+                case "2" -> {
+                    paymentDetails = collectCardDetails();
+                    yield new CardPaymentStrategy(paymentService.getDiscountPolicy());
+                }
+                case "3" -> {
+                    paymentDetails = collectUpiDetails();
+                    yield new UpiPaymentStrategy(paymentService.getDiscountPolicy());
+                }
                 default -> throw new IllegalArgumentException("Invalid payment option.");
             };
-            Order order = orderService.placeOrder(customer.getId(), houseNo, mainAddress, pincode, cart, strategy);
+            Order order = orderService.placeOrder(customer.getId(), houseNo, mainAddress, pincode, cart, strategy, paymentDetails);
             cartService.clearCart(customer.getId());
             System.out.println("Order placed successfully: " + order.getId());
             System.out.println("Total payable: " + order.getFinalAmount());
+            System.out.println("Payment method: " + order.getPaymentMethodName());
         } catch (Exception e) {
             System.out.println("Checkout failed: " + e.getMessage());
         }
+    }
+
+    private String collectUpiDetails() {
+        System.out.print("Enter UPI ID: ");
+        String upiId = scanner.nextLine().trim();
+        if (!Pattern.matches("^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$", upiId)) {
+            throw new IllegalArgumentException("Invalid UPI ID format.");
+        }
+        return upiId;
+    }
+
+    private String collectCardDetails() {
+        System.out.print("Enter card number: ");
+        String cardNumber = scanner.nextLine().trim();
+        if (!Pattern.matches("^\\d{16}$", cardNumber)) {
+            throw new IllegalArgumentException("Card number must be 16 digits.");
+        }
+        System.out.print("Enter expiry date (MM/YY): ");
+        String expiryDate = scanner.nextLine().trim();
+        if (!Pattern.matches("^(0[1-9]|1[0-2])/[0-9]{2}$", expiryDate)) {
+            throw new IllegalArgumentException("Expiry date must be in MM/YY format.");
+        }
+        System.out.print("Enter CVV: ");
+        String cvv = scanner.nextLine().trim();
+        if (!Pattern.matches("^\\d{3}$", cvv)) {
+            throw new IllegalArgumentException("CVV must be 3 digits.");
+        }
+        return cardNumber + "|" + expiryDate + "|" + cvv;
     }
 
     private void viewCurrentOrders() {
@@ -400,7 +440,11 @@ public class CustomerMenu {
         System.out.println("Order ID     : " + order.getId());
         System.out.println("Status       : " + order.getStatus());
         System.out.println("Placed At    : " + order.getOrderDate().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
-        System.out.println("Delivery Address: " + order.getDeliveryAddress());
+        System.out.println("Delivery Address:");
+        System.out.println("  House No : " + (order.getHouseNO() == null ? "" : order.getHouseNO()));
+        System.out.println("  Main Address : " + (order.getMainAddress() == null ? "" : order.getMainAddress()));
+        System.out.println("  Pincode : " + (order.getPincode() == null ? "" : order.getPincode()));
+        System.out.println("Payment Method: " + order.getPaymentMethodName());
         System.out.println("Delivery Person: " + deliveryPersonName);
         System.out.println("Items:");
         System.out.printf("%-10s %-20s %-8s %-10s%n", "Item ID", "Name", "Qty", "Price");

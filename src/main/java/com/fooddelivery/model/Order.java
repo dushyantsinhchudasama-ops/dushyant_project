@@ -18,6 +18,7 @@ public class Order {
     private final double discountAmount;
     private final double finalAmount;
     private final PaymentType paymentType;
+    private final String paymentDetails;
     private final String houseNO;
     private final String mainAddress;
     private final String pincode;
@@ -33,6 +34,7 @@ public class Order {
                  double discountAmount,
                  double finalAmount,
                  PaymentType paymentType,
+                 String paymentDetails,
                  String houseNO,
                  String mainAddress,
                  String pincode,
@@ -49,6 +51,7 @@ public class Order {
         this.discountAmount = discountAmount;
         this.finalAmount = finalAmount;
         this.paymentType = paymentType;
+        this.paymentDetails = paymentDetails;
         this.houseNO = houseNO;
         this.mainAddress = mainAddress;
         this.pincode = pincode;
@@ -96,6 +99,14 @@ public class Order {
         return paymentType;
     }
 
+    public String getPaymentDetails() {
+        return paymentDetails;
+    }
+
+    public String getPaymentMethodName() {
+        return paymentType == null ? "cash" : paymentType.name().toLowerCase();
+    }
+
     public String getHouseNO() {
         return houseNO;
     }
@@ -106,6 +117,26 @@ public class Order {
 
     public String getMainAddress() {
         return mainAddress;
+    }
+
+    public String getDeliveryAddress() {
+        StringBuilder address = new StringBuilder();
+        if (houseNO != null && !houseNO.isBlank()) {
+            address.append(houseNO);
+        }
+        if (mainAddress != null && !mainAddress.isBlank()) {
+            if (!address.isEmpty()) {
+                address.append(", ");
+            }
+            address.append(mainAddress);
+        }
+        if (pincode != null && !pincode.isBlank()) {
+            if (!address.isEmpty()) {
+                address.append(", ");
+            }
+            address.append(pincode);
+        }
+        return address.toString();
     }
 
     public OrderStatus getStatus() {
@@ -132,7 +163,8 @@ public class Order {
                 ", discountAmount=" + discountAmount +
                 ", finalAmount=" + finalAmount +
                 ", paymentType=" + paymentType +
-                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", paymentDetails='" + paymentDetails + '\'' +
+                ", deliveryAddress='" + getDeliveryAddress() + '\'' +
                 ", status=" + status +
                 ", orderDate=" + orderDate +
                 '}';

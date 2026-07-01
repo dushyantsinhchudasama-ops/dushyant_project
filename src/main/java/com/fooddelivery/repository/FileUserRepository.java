@@ -107,7 +107,7 @@ public class FileUserRepository implements UserRepository {
 
     private AbstractUser parseLine(String line) {
         String[] parts = line.split(DELIMITER, -1);
-        if (parts.length != 11) {
+        if (parts.length < 8) {
             throw new DataAccessException("Invalid user record: " + line);
         }
 
@@ -116,12 +116,34 @@ public class FileUserRepository implements UserRepository {
         String name = parts[2];
         String email = parts[3];
         String password = parts[4];
-        String phoneNumber = parts[5];
-        String houseNo = parts[6];
-        String mainAddress = parts[7];
-        String pincode = parts[8];
-        String vehicleNumber = parts[9];
-        boolean available = Boolean.parseBoolean(parts[10]);
+        String phoneNumber = parts.length > 5 ? parts[5] : "";
+
+        String houseNo = "";
+        String mainAddress = "";
+        String pincode = "";
+        String vehicleNumber = "";
+        boolean available = false;
+
+        if (role == Role.CUSTOMER) {
+            if (parts.length >= 11) {
+                houseNo = parts[6];
+                mainAddress = parts[7];
+                pincode = parts[8];
+            } else if (parts.length >= 7) {
+                houseNo = parts[6];
+            }
+        } else if (role == Role.DELIVERY_PERSON) {
+            if (parts.length >= 11) {
+                vehicleNumber = parts[9];
+                available = Boolean.parseBoolean(parts[10]);
+            } else if (parts.length >= 9) {
+                vehicleNumber = parts[7];
+                available = Boolean.parseBoolean(parts[8]);
+            } else if (parts.length >= 8) {
+                vehicleNumber = parts[6];
+                available = Boolean.parseBoolean(parts[7]);
+            }
+        }
 
         return switch (role) {
             case SUPER_ADMIN -> UserFactory.createAdmin(id, name, email, password, true);

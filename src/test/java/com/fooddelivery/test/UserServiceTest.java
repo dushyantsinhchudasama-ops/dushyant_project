@@ -54,7 +54,7 @@ public class UserServiceTest {
 
     @Test
     void shouldRegisterCustomerAndAllowLogin() {
-        Customer customer = customerService.registerCustomer("Mira Patel", "mira@example.com", "pass123", "9999999999", "12 Jain Street");
+        Customer customer = customerService.registerCustomer("Mira Patel", "mira@example.com", "pass123", "9999999999", "12", "Jain Street", "560001");
         assertNotNull(customer.getId());
         assertEquals(Role.CUSTOMER, customer.getRole());
 
@@ -63,6 +63,22 @@ public class UserServiceTest {
         assertThrows(InvalidCredentialsException.class, () -> authenticationService.login("mira@example.com", "wrongpass"));
 
         assertEquals(customer.getId(), authenticationService.login("mira@example.com", "pass123").getId());
+    }
+
+    @Test
+    void shouldLoadLegacyUserRecordsWithMissingAddressFields() throws IOException {
+        Files.writeString(TEST_FILE, String.join(System.lineSeparator(),
+                "1\u001FDELIVERY_PERSON\u001Ftest person\u001Ftestdel@mail.com\u001F12345\u001F12345\u001F\u001Fgj03jh9803\u001Ftrue",
+                "2\u001FCUSTOMER\u001FDushyant\u001Fdushyant@mail.com\u001F12345\u001F12345\u001FRajkot\u001F\u001Ffalse"
+        ));
+
+        UserRepository legacyRepository = new FileUserRepository(TEST_FILE.toString());
+
+        var deliveryUser = legacyRepository.findById("1").orElseThrow();
+        assertEquals(Role.DELIVERY_PERSON, deliveryUser.getRole());
+
+        var customerUser = legacyRepository.findById("2").orElseThrow();
+        assertEquals(Role.CUSTOMER, customerUser.getRole());
     }
 
     @Test
@@ -102,15 +118,15 @@ public class UserServiceTest {
 
     @Test
     void shouldNotAllowDuplicateEmailForCustomerRegistration() {
-        customerService.registerCustomer("Sam", "sam@example.com", "pass", "9999999999", "34 Road");
+        customerService.registerCustomer("Sam", "sam@example.com", "pass", "9999999999", "34", "Road", "560002");
         assertThrows(AlreadyExistsException.class,
-                () -> customerService.registerCustomer("Sam Two", "sam@example.com", "pass2", "8888888888", "35 Road"));
+                () -> customerService.registerCustomer("Sam Two", "sam@example.com", "pass2", "8888888888", "35", "Road", "560003"));
     }
 
     @Test
     void shouldUpdateCustomerProfile() {
-        Customer customer = customerService.registerCustomer("Nina", "nina@example.com", "pass", "7777777777", "101 Lane");
-        Customer updated = customerService.updateProfile(customer.getId(), "Nina Roy", "nina.roy@example.com", "6666666666", "102 Lane");
+        Customer customer = customerService.registerCustomer("Nina", "nina@example.com", "pass", "7777777777", "101", "Lane", "560004");
+        Customer updated = customerService.updateProfile(customer.getId(), "Nina Roy", "nina.roy@example.com", "6666666666", "102", "Lane", "560005");
 
         assertEquals("Nina Roy", updated.getName());
         assertEquals("nina.roy@example.com", updated.getEmail());

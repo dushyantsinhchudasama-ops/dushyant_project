@@ -116,14 +116,14 @@ public class MainMenu {
         String password = scanner.nextLine().trim();
         System.out.print("Phone number: ");
         String phone = scanner.nextLine().trim();
-        System.out.print("House / Flat NO: ");
+        System.out.print("House / Flat No: ");
         String houseNo = scanner.nextLine().trim();
         System.out.print("Main Address Line: ");
         String mainAddress = scanner.nextLine().trim();
-        System.out.println("Pincode: ");
+        System.out.print("Pincode: ");
         String pincode = scanner.nextLine().trim();
         try {
-            var customer = customerService.registerCustomer(name, email, password, phone, address);
+            customerService.registerCustomer(name, email, password, phone, houseNo, mainAddress, pincode);
             System.out.println("Registration successful. Please login.");
         } catch (Exception e) {
             System.out.println("Registration failed: " + e.getMessage());

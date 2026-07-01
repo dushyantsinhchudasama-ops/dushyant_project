@@ -24,11 +24,12 @@ public class DeliveryMenu {
             showDeliveryOptions();
             String option = scanner.nextLine().trim();
             switch (option) {
-                case "1" -> viewAssignedOrders();
-                case "2" -> acceptNextOrder();
-                case "3" -> viewOrderDetails();
-                case "4" -> updateOrderStatus();
-                case "5" -> running = false;
+                case "1" -> viewPendingOrders();
+                case "2" -> viewAllAssignedOrders();
+                case "3" -> acceptNextOrder();
+                case "4" -> viewOrderDetails();
+                case "5" -> updateOrderStatus();
+                case "6" -> running = false;
                 default -> System.out.println("Invalid option. Please try again.");
             }
         }
@@ -36,20 +37,34 @@ public class DeliveryMenu {
 
     private void showDeliveryOptions() {
         System.out.println("\n=== Delivery Person Menu ===");
-        System.out.println("1. View Assigned Orders");
-        System.out.println("2. Accept Order");
-        System.out.println("3. View Order Details");
-        System.out.println("4. Update Order Status");
-        System.out.println("5. Logout");
+        System.out.println("1. View Remaining Orders");
+        System.out.println("2. View All Assigned Orders");
+        System.out.println("3. Accept Order");
+        System.out.println("4. View Order Details");
+        System.out.println("5. Update Order Status");
+        System.out.println("6. Logout");
         System.out.print("Choose an option: ");
     }
 
-    private void viewAssignedOrders() {
+    private void viewPendingOrders() {
+        List<Order> orders = orderService.getOrdersByDeliveryPerson(deliveryPerson.getId()).stream()
+                .filter(order -> order.getStatus() != com.fooddelivery.enums.OrderStatus.DELIVERED && order.getStatus() != com.fooddelivery.enums.OrderStatus.CANCELLED)
+                .toList();
+        if (orders.isEmpty()) {
+            System.out.println("No remaining orders to deliver.");
+            return;
+        }
+        System.out.println("Remaining orders:");
+        orders.forEach(order -> System.out.printf("%s - status=%s - total=%.2f%n", order.getId(), order.getStatus(), order.getFinalAmount()));
+    }
+
+    private void viewAllAssignedOrders() {
         List<Order> orders = orderService.getOrdersByDeliveryPerson(deliveryPerson.getId());
         if (orders.isEmpty()) {
             System.out.println("No orders assigned.");
             return;
         }
+        System.out.println("All assigned orders:");
         orders.forEach(order -> System.out.printf("%s - status=%s - total=%.2f%n", order.getId(), order.getStatus(), order.getFinalAmount()));
     }
 
@@ -87,7 +102,11 @@ public class DeliveryMenu {
             System.out.println("Customer ID   : " + order.getCustomerId());
             System.out.println("Status        : " + order.getStatus());
             System.out.println("Placed At     : " + order.getOrderDate().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
-            System.out.println("Delivery Address: " + order.getDeliveryAddress());
+            System.out.println("Delivery Address:");
+            System.out.println("  House No : " + (order.getHouseNO() == null ? "" : order.getHouseNO()));
+            System.out.println("  Main Address : " + (order.getMainAddress() == null ? "" : order.getMainAddress()));
+            System.out.println("  Pincode : " + (order.getPincode() == null ? "" : order.getPincode()));
+            System.out.println("Payment Method: " + order.getPaymentMethodName());
             System.out.println("Items:");
             System.out.printf("%-10s %-20s %-8s %-10s%n", "Item ID", "Name", "Qty", "Price");
             System.out.println("------------------------------------------------------------");
